@@ -475,3 +475,5 @@ function PANEL:Paint(w, h)
 end
 
 vgui.Register('DPointShopMenu', PANEL)
+
+--test

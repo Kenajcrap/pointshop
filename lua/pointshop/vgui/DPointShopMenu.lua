@@ -247,13 +247,19 @@ function PANEL:Init()
 		
 		DScrollPanel:AddItem(ShopCategoryTabLayout)
 		
-		for _, ITEM in pairs(items) do
-			if ITEM.Category == CATEGORY.Name then
-				local model = vgui.Create('DPointShopItem')
-				model:SetData(ITEM)
-				model:SetSize(128, 128)
-				
-				ShopCategoryTabLayout:Add(model)
+		-- Create 50ms delay before loading the first item 
+		-- Then a 15ms delay between loading each concurrent item
+		local delay = 0.05		
+		for _, ITEM in pairs(items) do				
+			if ITEM.Category == CATEGORY.Name then			
+				timer.Simple(delay, function()
+					local model = vgui.Create('DPointShopItem')
+					model:SetData(ITEM)
+					model:SetSize(128, 128)
+					
+					ShopCategoryTabLayout:Add(model)				
+				end)					
+				delay = delay + 0.015
 			end
 		end
 
@@ -273,8 +279,8 @@ function PANEL:Init()
 		ClientsList:Dock(FILL)
 		
 		ClientsList:SetMultiSelect(false)
-		ClientsList:AddColumn('Nome')
-		ClientsList:AddColumn('Pontos'):SetFixedWidth(60)
+		ClientsList:AddColumn('Name')
+		ClientsList:AddColumn('Points'):SetFixedWidth(60)
 		ClientsList:AddColumn('Items'):SetFixedWidth(60)
 		
 		ClientsList.OnClickLine = function(parent, line, selected)
@@ -282,10 +288,10 @@ function PANEL:Init()
 			
 			local menu = DermaMenu()
 			
-			menu:AddOption('Definir '..PS.Config.PointsName..'...', function()
+			menu:AddOption('Set '..PS.Config.PointsName..'...', function()
 				Derma_StringRequest(
-					"Definir "..PS.Config.PointsName.." para " .. ply:GetName(),
-					"Definir "..PS.Config.PointsName.." para...",
+					"Set "..PS.Config.PointsName.." for " .. ply:GetName(),
+					"Set "..PS.Config.PointsName.." to...",
 					"",
 					function(str)
 						if not str or not tonumber(str) then return end
@@ -298,10 +304,10 @@ function PANEL:Init()
 				)
 			end)
 			
-			menu:AddOption('Dar '..PS.Config.PointsName..'...', function()
+			menu:AddOption('Give '..PS.Config.PointsName..'...', function()
 				Derma_StringRequest(
-					"Dar "..PS.Config.PointsName.." para " .. ply:GetName(),
-					"Dar "..PS.Config.PointsName.."...",
+					"Give "..PS.Config.PointsName.." to " .. ply:GetName(),
+					"Give "..PS.Config.PointsName.."...",
 					"",
 					function(str)
 						if not str or not tonumber(str) then return end
@@ -314,10 +320,10 @@ function PANEL:Init()
 				)
 			end)
 			
-			menu:AddOption('Pegar '..PS.Config.PointsName..'...', function()
+			menu:AddOption('Take '..PS.Config.PointsName..'...', function()
 				Derma_StringRequest(
-					"Pegar "..PS.Config.PointsName.." de " .. ply:GetName(),
-					"Pegar "..PS.Config.PointsName.."...",
+					"Take "..PS.Config.PointsName.." from " .. ply:GetName(),
+					"Take "..PS.Config.PointsName.."...",
 					"",
 					function(str)
 						if not str or not tonumber(str) then return end
@@ -459,13 +465,15 @@ function PANEL:Paint(w, h)
 	surface.DrawRect(0, 0, w, 48)
 
 	if PS.Config.CommunityName then
-		draw.SimpleText("Pointshop do "..PS.Config.CommunityName, 'PS_LargeTitle', 16, 8, color_white)
+		draw.SimpleText(PS.Config.CommunityName .. " PointShop", 'PS_LargeTitle', 16, 8, color_white)
 	else
 		draw.SimpleText("PointShop", 'PS_LargeTitle', 16, 8, color_white)
 	end
 
-	draw.SimpleText('Você tem ' .. LocalPlayer():PS_GetPoints() .. ' ' .. PS.Config.PointsName, 'PS_Heading3', self:GetWide() - 40, 24, color_white, TEXT_ALIGN_RIGHT, TEXT_ALIGN_CENTER)
+	draw.SimpleText('You have ' .. LocalPlayer():PS_GetPoints() .. ' ' .. PS.Config.PointsName, 'PS_Heading3', self:GetWide() - 40, 24, color_white, TEXT_ALIGN_RIGHT, TEXT_ALIGN_CENTER)
 	
 end
 
 vgui.Register('DPointShopMenu', PANEL)
+
+--test

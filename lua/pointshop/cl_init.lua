@@ -11,7 +11,6 @@ include "vgui/DPointShopItem.lua"
 include "vgui/DPointShopPreview.lua"
 include "vgui/DPointShopColorChooser.lua"
 include "vgui/DPointShopGivePoints.lua"
-include "vgui/DPointShopBodygroupChooser.lua"
 
 PS.ShopMenu = nil
 PS.ClientsideModels = {}
@@ -63,18 +62,6 @@ function PS:ShowColorChooser(item, modifications)
 	
 	chooser.OnChoose = function(color)
 		modifications.color = color
-		self:SendModifications(item.ID, modifications)
-	end
-end
-
-function PS:ShowBodygroupChooser(item, modifications)
-	-- TODO: Do this
-	local chooser = vgui.Create('DPointShopBodygroupChooser')
-	chooser:Start(item, modifications)
-	print(modifications)
-	chooser.OnChoose = function(group, sskin)
-		modifications.group = group
-		modifications.skin = sskin
 		self:SendModifications(item.ID, modifications)
 	end
 end

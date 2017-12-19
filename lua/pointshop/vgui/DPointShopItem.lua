@@ -17,23 +17,23 @@ function PANEL:DoClick()
 	local points = PS.Config.CalculateBuyPrice(LocalPlayer(), self.Data)
 	
 	if not LocalPlayer():PS_HasItem(self.Data.ID) and not LocalPlayer():PS_HasPoints(points) then
-		notification.AddLegacy("You don't have enough "..PS.Config.PointsName.." for this!", NOTIFY_GENERIC, 5)
+		notification.AddLegacy("Você nao tem "..PS.Config.PointsName.." suficientes pra isso!", NOTIFY_GENERIC, 5)
 	end
 
 	local menu = DermaMenu(self)
 	
 	if LocalPlayer():PS_HasItem(self.Data.ID) then
 		menu:AddOption('Sell', function()
-			Derma_Query('Are you sure you want to sell ' .. self.Data.Name .. '?', 'Sell Item',
-				'Yes', function() LocalPlayer():PS_SellItem(self.Data.ID) end,
-				'No', function() end
+			Derma_Query('Tem certeza que deseja vender ' .. self.Data.Name .. '?', 'Vender Item',
+				'Sim', function() LocalPlayer():PS_SellItem(self.Data.ID) end,
+				'Não', function() end
 			)
 		end)
 	elseif LocalPlayer():PS_HasPoints(points) then
 		menu:AddOption('Buy', function()
-			Derma_Query('Are you sure you want to buy ' .. self.Data.Name .. '?', 'Buy Item',
-				'Yes', function() LocalPlayer():PS_BuyItem(self.Data.ID) end,
-				'No', function() end
+			Derma_Query('Tem certeza que deseja comprar ' .. self.Data.Name .. '?', 'Comprar Item',
+				'Sim', function() LocalPlayer():PS_BuyItem(self.Data.ID) end,
+				'Não', function() end
 			)
 		end)
 	end
@@ -42,11 +42,11 @@ function PANEL:DoClick()
 		menu:AddSpacer()
 		
 		if LocalPlayer():PS_HasItemEquipped(self.Data.ID) then
-			menu:AddOption('Holster', function()
+			menu:AddOption('Desequipar', function()
 				LocalPlayer():PS_HolsterItem(self.Data.ID)
 			end)
 		else
-			menu:AddOption('Equip', function()
+			menu:AddOption('Equipar', function()
 				LocalPlayer():PS_EquipItem(self.Data.ID)
 			end)
 		end
@@ -54,7 +54,7 @@ function PANEL:DoClick()
 		if LocalPlayer():PS_HasItemEquipped(self.Data.ID) and self.Data.Modify then
 			menu:AddSpacer()
 			
-			menu:AddOption('Modify...', function()
+			menu:AddOption('Modificar', function()
 				PS.Items[self.Data.ID]:Modify(LocalPlayer().PS_Items[self.Data.ID].Modifiers)
 			end)
 		end
@@ -74,21 +74,34 @@ function PANEL:SetData(data)
 		DModelPanel:Dock(FILL)
 		
 		if data.Skin then
-			DModelPanel:SetSkin(data.Skin)
+			DModelPanel.Entity:SetSkin(data.Skin)
 		end
 		
 		local PrevMins, PrevMaxs = DModelPanel.Entity:GetRenderBounds()
-		DModelPanel:SetCamPos(PrevMins:Distance(PrevMaxs) * Vector(0.5, 0.5, 0.5))
+		DModelPanel:SetCamPos(PrevMins:Distance(PrevMaxs) * Vector(0.4, 0.4, 0.4))
 		DModelPanel:SetLookAt((PrevMaxs + PrevMins) / 2)
+		DModelPanel:SetAmbientLight( Color( 255, 255, 255, 255 ) )
+
+		DModelPanel.Angles = Angle( 0, 0, 0 )
 		
-		function DModelPanel:LayoutEntity(ent)
-			if self:GetParent().Hovered then
-				ent:SetAngles(Angle(0, ent:GetAngles().y + 2, 0))
+		function DModelPanel:DragMousePress()
+			self.PressX, self.PressY = gui.MousePos()
+			self.Pressed = true
+		end
+
+		function DModelPanel:DragMouseRelease() self.Pressed = false end
+
+		function DModelPanel:LayoutEntity( Entity )
+			if ( self.bAnimated ) then self:RunAnimation() end
+
+			if ( self.Pressed ) then
+				local mx, my = gui.MousePos()
+				self.Angles = self.Angles - Angle( 0, ( self.PressX or mx ) - mx, 0 )
+
+				self.PressX, self.PressY = gui.MousePos()
 			end
-			
-			local ITEM = PS.Items[data.ID]
-			
-			ITEM:ModifyClientsideModel(LocalPlayer(), ent, Vector(), Angle())
+
+			Entity:SetAngles( self.Angles )
 		end
 		
 		function DModelPanel:DoClick()
@@ -102,6 +115,8 @@ function PANEL:SetData(data)
 		function DModelPanel:OnCursorExited()
 			self:GetParent():OnCursorExited()
 		end
+
+
 
 	else
 		local DImageButton = vgui.Create('DImageButton', self)

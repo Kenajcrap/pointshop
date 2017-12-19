@@ -2,7 +2,6 @@ local PANEL = {}
 
 function PANEL:Init()
 	self:SetModel(LocalPlayer():GetModel())
-	
 	local PrevMins, PrevMaxs = self.Entity:GetRenderBounds()
 	self:SetCamPos(PrevMins:Distance(PrevMaxs) * Vector(0.30, 0.30, 0.25) + Vector(0, 0, 15))
 	self:SetLookAt((PrevMaxs + PrevMins) / 2)
@@ -38,6 +37,11 @@ function PANEL:Paint()
 	end
 
 	self.Entity:DrawModel()
+
+	for k, v in ipairs(LocalPlayer():GetBodyGroups()) do
+		self.Entity:SetBodygroup(k, v.num)
+	end
+	self.Entity:SetSkin(LocalPlayer():GetSkin())
 
 	self:DrawOtherModels()
 	
@@ -126,6 +130,10 @@ function PANEL:DrawOtherModels()
 		end
 	else
 		self:SetModel(LocalPlayer():GetModel())
+		for k, v in ipairs(LocalPlayer():GetBodyGroups()) do
+			self.Entity:SetBodygroup(k, v.num)
+		end
+		self.Entity:SetSkin(LocalPlayer():GetSkin())
 	end
 end
 
